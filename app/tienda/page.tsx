@@ -37,16 +37,26 @@ export default function Tienda() {
   const [tema, setTema] = useState<Tema>("volt");
   const [cart, setCart] = useState<CartMap>({});
   const [filter, setFilter] = useState<ProductCategory | "todos">("todos");
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     setTema(readTema());
     setCart(readCart());
   }, []);
 
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   function add(slug: string) {
     const next = { ...cart, [slug]: (cart[slug] ?? 0) + 1 };
     setCart(next);
     writeCart(next);
+    // El agente de surtido se hace presente en cada acción de compra
+    const p = CATALOG.find((x) => x.slug === slug);
+    if (p) setToast(`Surtido reservó 1 ud de ${p.name} para tu pedido`);
   }
 
   const filtered = useMemo(
@@ -231,6 +241,27 @@ export default function Tienda() {
           general y educativa, no sustituye consejo médico.
         </p>
       </div>
+
+      {/* Toast del agente de surtido */}
+      {toast && (
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2.5 ${cardClass(tema)} border-[var(--c-line)] bg-[var(--c-surface)] px-5 py-3 text-[13px] font-semibold shadow-lg`}
+        >
+          <span
+            className="h-2 w-2 animate-pulse rounded-full"
+            style={{ background: tema === "volt" ? "#efb23c" : "#a96f0e" }}
+          />
+          <span
+            className="text-[10px] font-extrabold uppercase tracking-[0.14em]"
+            style={{ color: tema === "volt" ? "#efb23c" : "#a96f0e" }}
+          >
+            Surtido
+          </span>
+          {toast.replace(/^Surtido /, "")}
+        </motion.div>
+      )}
     </div>
   );
 }

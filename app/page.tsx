@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import {
   ArrowUpRight,
+  Bot,
   Check,
   Link2,
   Plus,
@@ -469,6 +470,10 @@ export default function RufiasPrototype() {
                 datos de Strava
               </div>
             )}
+            <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-[var(--c-muted)]">
+              <Bot size={14} className="text-[var(--c-accent)]" />
+              Armado por el agente de venta · revisado contra tus riesgos declarados
+            </div>
 
             <div className="mt-7 grid gap-3.5 md:grid-cols-2">
               {stack.items.map((it, i) => {
