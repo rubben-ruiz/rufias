@@ -119,7 +119,7 @@ export default function Consola() {
     setTema(readTema());
   }, []);
 
-  // Feed simulado: un evento nuevo cada ~2.4s, en loop
+  // Feed simulado: un evento nuevo cada 10s, en loop
   useEffect(() => {
     const tick = () => {
       const ev = FEED_SCRIPT[scriptIdx.current % FEED_SCRIPT.length];
@@ -128,7 +128,7 @@ export default function Consola() {
       setFeed((f) => [...f.slice(-30), { ...ev, ts }]);
     };
     tick();
-    const id = setInterval(tick, 2400);
+    const id = setInterval(tick, 10000);
     return () => clearInterval(id);
   }, []);
 
