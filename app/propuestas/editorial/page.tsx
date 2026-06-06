@@ -47,7 +47,7 @@ export default function EditorialLanding() {
               <Link href="/tienda?tema=editorial" className="transition hover:text-inked">Tienda</Link>
               <Link href="/propuestas" className="transition hover:text-maroon">Propuestas</Link>
               <Link
-                href="/?tema=editorial"
+                href="/consulta?tema=editorial"
                 className="border-2 border-inked bg-inked px-5 py-2 font-anton text-[14px] uppercase tracking-wider text-paper transition hover:bg-maroon hover:border-maroon"
               >
                 Empieza tu temporada
@@ -90,7 +90,7 @@ export default function EditorialLanding() {
               className="flex flex-wrap items-center gap-4"
             >
               <Link
-                href="/?tema=editorial"
+                href="/consulta?tema=editorial"
                 className="inline-flex items-center gap-2.5 border-2 border-inked bg-gold px-7 py-3.5 font-anton text-[16px] uppercase tracking-wider text-inked transition hover:-translate-y-0.5"
               >
                 Consulta gratuita <ArrowRight size={17} strokeWidth={2.5} />
@@ -318,7 +318,7 @@ export default function EditorialLanding() {
           </motion.h2>
           <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.1 }}>
             <Link
-              href="/?tema=editorial"
+              href="/consulta?tema=editorial"
               className="mt-10 inline-flex items-center gap-2.5 border-2 border-inked bg-inked px-8 py-4 font-anton text-[16px] uppercase tracking-wider text-paper transition hover:-translate-y-0.5 hover:bg-maroon hover:border-maroon"
             >
               Hablar con el agente <ArrowRight size={17} strokeWidth={2.5} />

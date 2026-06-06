@@ -50,7 +50,7 @@ export default function VoltLanding() {
             <Link href="/tienda?tema=volt" className="transition hover:text-bone">Tienda</Link>
             <Link href="/propuestas" className="transition hover:text-volt">Propuestas</Link>
             <Link
-              href="/?tema=volt"
+              href="/consulta?tema=volt"
               className="rounded-full bg-volt px-5 py-2.5 font-extrabold text-coal transition hover:bg-volt2"
             >
               Arma mi stack
@@ -107,7 +107,7 @@ export default function VoltLanding() {
               className="mt-9 flex flex-wrap items-center gap-4"
             >
               <Link
-                href="/?tema=volt"
+                href="/consulta?tema=volt"
                 className="inline-flex items-center gap-2.5 rounded-full bg-volt px-7 py-4 text-[15px] font-extrabold text-coal transition hover:-translate-y-0.5 hover:bg-volt2"
               >
                 Arma mi stack <ArrowRight size={17} strokeWidth={2.5} />
@@ -421,7 +421,7 @@ export default function VoltLanding() {
           </motion.h2>
           <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.1 }}>
             <Link
-              href="/?tema=volt"
+              href="/consulta?tema=volt"
               className="mt-10 inline-flex items-center gap-2.5 rounded-full bg-coal px-8 py-4 text-[15px] font-extrabold text-volt transition hover:-translate-y-0.5"
             >
               Hablar con el agente <ArrowRight size={17} strokeWidth={2.5} />

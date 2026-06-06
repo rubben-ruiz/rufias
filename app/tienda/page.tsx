@@ -202,7 +202,7 @@ export default function Tienda() {
           </Link>
           <div className="flex items-center gap-5">
             <Link
-              href={`/?tema=${tema}`}
+              href={`/consulta?tema=${tema}`}
               className="text-xs font-semibold text-[var(--c-muted)] transition hover:text-[var(--c-accent)]"
             >
               Consulta
@@ -384,7 +384,7 @@ export default function Tienda() {
                     // Venta responsable ejecutada por el sistema: este producto
                     // no se vende sin pasar por el agente.
                     <Link
-                      href={`/?tema=${tema}`}
+                      href={`/consulta?tema=${tema}`}
                       className={`inline-flex items-center gap-1.5 ${pill} border border-[var(--c-accent)] px-4 py-2 text-xs font-extrabold text-[var(--c-accent)] transition hover:bg-[var(--c-accent)] hover:text-[var(--c-onaccent)]`}
                     >
                       <Bot size={13} /> Consultar al agente
@@ -423,7 +423,7 @@ export default function Tienda() {
               y te quita lo que no te sirve.
             </p>
           </div>
-          <Link href={`/?tema=${tema}`} className={`${btn} px-6 py-3 text-sm`}>
+          <Link href={`/consulta?tema=${tema}`} className={`${btn} px-6 py-3 text-sm`}>
             Hablar con el agente <ArrowRight size={15} strokeWidth={2.5} />
           </Link>
         </motion.div>

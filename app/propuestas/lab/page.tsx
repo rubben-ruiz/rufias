@@ -50,7 +50,7 @@ export default function LabLanding() {
             <Link href="/tienda?tema=lab" className="transition hover:text-inkdeep">Tienda</Link>
             <Link href="/propuestas" className="transition hover:text-pine">Propuestas</Link>
             <Link
-              href="/?tema=lab"
+              href="/consulta?tema=lab"
               className="rounded-full bg-pine px-5 py-2.5 font-semibold text-cream transition hover:bg-pine2"
             >
               Iniciar consulta
@@ -93,7 +93,7 @@ export default function LabLanding() {
               className="mt-9 flex flex-wrap items-center gap-4"
             >
               <Link
-                href="/?tema=lab"
+                href="/consulta?tema=lab"
                 className="inline-flex items-center gap-2 rounded-full bg-pine px-7 py-3.5 text-[15px] font-semibold text-cream transition hover:-translate-y-0.5 hover:bg-pine2"
               >
                 Iniciar mi consulta <ArrowRight size={16} />
@@ -358,7 +358,7 @@ export default function LabLanding() {
           </motion.h2>
           <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.1 }}>
             <Link
-              href="/?tema=lab"
+              href="/consulta?tema=lab"
               className="mt-10 inline-flex items-center gap-2 rounded-full bg-cream px-8 py-4 text-[15px] font-semibold text-pine transition hover:-translate-y-0.5"
             >
               Iniciar mi consulta <ArrowRight size={16} />

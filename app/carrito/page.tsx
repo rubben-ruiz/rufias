@@ -99,7 +99,7 @@ export default function Carrito() {
               Tienda
             </Link>
             <Link
-              href={`/?tema=${tema}`}
+              href={`/consulta?tema=${tema}`}
               className="text-xs font-semibold text-[var(--c-muted)] transition hover:text-[var(--c-accent)]"
             >
               Consulta
@@ -242,7 +242,7 @@ export default function Carrito() {
               <Link href={`/tienda?tema=${tema}`} className={`${btn} px-6 py-3 text-sm`}>
                 Ir a la tienda <ArrowRight size={15} />
               </Link>
-              <Link href={`/?tema=${tema}`} className={`${ghost} px-6 py-3 text-sm`}>
+              <Link href={`/consulta?tema=${tema}`} className={`${ghost} px-6 py-3 text-sm`}>
                 Hablar con el agente
               </Link>
             </div>

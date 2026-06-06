@@ -216,7 +216,7 @@ export default function Consola() {
       <header className={`${CONTAINER} flex items-center justify-between border-b border-[var(--c-line)] py-4`}>
         <div className="flex items-center gap-3">
           <Link
-            href={`/?tema=${tema}`}
+            href={`/consulta?tema=${tema}`}
             aria-label="Volver a la tienda"
             className={`grid h-9 w-9 place-items-center border border-[var(--c-line)] ${pill} text-[var(--c-muted)] transition hover:text-[var(--c-accent)]`}
           >
