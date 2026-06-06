@@ -108,6 +108,9 @@ export default function Consola() {
   const [decisions, setDecisions] = useState<Decision[]>([]);
   const [caseIdx, setCaseIdx] = useState(0);
   const [running, setRunning] = useState(false);
+  const [runningName, setRunningName] = useState("");
+  const [customSignal, setCustomSignal] = useState("");
+  const liveCount = useRef(0);
   const [kpi, setKpi] = useState({ pedidos: 47, stacks: 31, retencion: 92, derivados: 6 });
   const feedRef = useRef<HTMLDivElement>(null);
   const scriptIdx = useRef(0);
@@ -146,10 +149,10 @@ export default function Consola() {
     feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight, behavior: "smooth" });
   }, [feed]);
 
-  async function runCase(idx: number) {
-    if (running || idx >= CASES.length) return;
-    const c = CASES[idx];
+  async function processCase(c: RetentionCase) {
+    if (running) return;
     setRunning(true);
+    setRunningName(c.customer);
     try {
       const raw = await callAI(RETENTION_SYSTEM, [
         { role: "user", content: `Señal del cliente ${c.customer} (${c.id}): ${c.signal}` },
@@ -160,8 +163,26 @@ export default function Consola() {
       setDecisions((d) => [{ caseData: c, result: FALLBACK_RESULT, live: false }, ...d]);
     } finally {
       setRunning(false);
-      setCaseIdx(idx + 1);
     }
+  }
+
+  async function runCase(idx: number) {
+    if (idx >= CASES.length) return;
+    await processCase(CASES[idx]);
+    setCaseIdx(idx + 1);
+  }
+
+  // Señal libre: escribe cualquier escenario y mira al agente decidir en vivo
+  async function runCustom() {
+    const signal = customSignal.trim();
+    if (!signal || running) return;
+    liveCount.current += 1;
+    setCustomSignal("");
+    await processCase({
+      id: `LIVE-${liveCount.current}`,
+      customer: "Señal en vivo",
+      signal,
+    });
   }
 
   // Sin auto-arranque: el agente de retención (IA real) solo corre con clic
@@ -324,6 +345,29 @@ export default function Consola() {
             </span>
           </header>
 
+          {/* Señal en vivo: inyecta cualquier escenario y mira al agente decidir */}
+          <div className="border-b border-[var(--c-line)] px-5 py-3">
+            <div className="flex gap-2">
+              <input
+                value={customSignal}
+                onChange={(e) => setCustomSignal(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && runCustom()}
+                placeholder="Escribe una señal de cliente… ej. «corrió su primer ultra y duplicó su pedido de geles»"
+                className={`${tema === "editorial" ? "rounded-none" : "rounded-xl"} w-full border border-[var(--c-line)] bg-[var(--c-surface2)] px-3.5 py-2.5 text-[13px] text-[var(--c-text)] outline-none transition placeholder:text-[var(--c-muted)] focus:border-[var(--c-accent)]`}
+              />
+              <button
+                onClick={runCustom}
+                disabled={running || !customSignal.trim()}
+                className={`shrink-0 ${pill} bg-[var(--c-accent)] px-4 text-[12px] font-extrabold text-[var(--c-onaccent)] transition hover:bg-[var(--c-accent2)] disabled:cursor-not-allowed disabled:opacity-45`}
+              >
+                Probar
+              </button>
+            </div>
+            <p className="mt-2 text-[10.5px] text-[var(--c-muted)]">
+              Decide con IA real · 1 llamada por prueba
+            </p>
+          </div>
+
           <div className="flex max-h-[56vh] min-h-[420px] flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
             {decisions.length === 0 && !running && (
               <p className="py-10 text-center text-[14px] text-[var(--c-muted)]">
@@ -335,7 +379,7 @@ export default function Consola() {
             {running && (
               <div className="flex items-center gap-3 py-2 text-[14px] text-[var(--c-muted)]">
                 <span className="h-[18px] w-[18px] animate-spin rounded-full border-2 border-[var(--c-line)] border-t-[var(--c-accent)]" />
-                Analizando señal de {CASES[Math.min(caseIdx, CASES.length - 1)].customer}…
+                Analizando señal de {runningName}…
               </div>
             )}
 

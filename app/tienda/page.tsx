@@ -3,7 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, Bot, Check, Plus, ShoppingBag } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  CalendarDays,
+  Check,
+  CloudSun,
+  Plus,
+  ShoppingBag,
+  Sparkles,
+  Tag,
+} from "lucide-react";
 import { CATALOG, formatMXN, type ProductCategory } from "@/lib/catalog";
 import { cartCount, readCart, writeCart, type CartMap } from "@/lib/cart";
 import {
@@ -27,6 +37,73 @@ const CATEGORIES: Array<ProductCategory | "todos"> = [
   "básicos",
 ];
 
+/* ──────────────────────────────────────────────
+   Pulso de hoy: los agentes recomiendan con
+   contexto del mundo real (mock) + IA real
+   ────────────────────────────────────────────── */
+type PulseCard = { reco: string; producto: string | null };
+type Pulse = { clima: PulseCard; evento: PulseCard; oferta: PulseCard };
+
+const PULSE_CONTEXT = {
+  clima:
+    "Hoy en CDMX: 24°C, soleado. Pronóstico del domingo (día de tirada larga): 31°C, humedad 38%, sin nubes.",
+  eventos:
+    "Carrera nocturna 10K este sábado en el Bosque de Chapultepec; inscripciones abiertas para el Medio Maratón CDMX (en 6 semanas).",
+  historial:
+    "El cliente compra Electrolitos Cítrico cada 4 semanas (3 compras seguidas); compró Proteína Whey Vainilla hace 2 meses; su tirada larga del domingo es de 21 km.",
+};
+
+const PULSE_SYSTEM = `Eres el equipo de agentes de IA de Rufias, tienda de nutrición deportiva para corredores. Con el contexto de HOY, genera exactamente 3 recomendaciones breves (1-2 frases), accionables y en español, tono cálido deportivo. Sin promesas médicas; dosis solo en rangos generales seguros.
+
+Responde SOLO con JSON válido, sin markdown:
+{"clima":{"reco":"...","producto":"<nombre EXACTO del catálogo o null>"},"evento":{"reco":"...","producto":"..."},"oferta":{"reco":"...","producto":"..."}}
+
+CATÁLOGO DISPONIBLE: ${CATALOG.map((p) => p.name).join(", ")}.
+
+CONTEXTO DE HOY (demo):
+- Clima: ${PULSE_CONTEXT.clima}
+- Eventos cercanos: ${PULSE_CONTEXT.eventos}
+- Historial del cliente: ${PULSE_CONTEXT.historial}`;
+
+const PULSE_FALLBACK: Pulse = {
+  clima: {
+    reco: "Domingo a 31°C para tus 21 km: sube tu sodio a 600–800 mg por hora y empieza hidratado desde el sábado.",
+    producto: "Electrolitos Cítrico",
+  },
+  evento: {
+    reco: "¿Te animas a la nocturna 10K del sábado en Chapultepec? Un gel con cafeína 45 min antes te da el empujón sin pesarte.",
+    producto: "Gel Energético + Cafeína",
+  },
+  oferta: {
+    reco: "Compras electrolitos cada 4 semanas — con suscripción nunca te quedas sin para el domingo y el envío corre por nuestra cuenta.",
+    producto: "Electrolitos Cítrico",
+  },
+};
+
+const PULSE_META = [
+  { key: "clima" as const, label: "Datos", icon: CloudSun, dark: "#9c9c96", light: "#6e6e64" },
+  { key: "evento" as const, label: "Captación", icon: CalendarDays, dark: "#5ba0e8", light: "#2f6cb3" },
+  { key: "oferta" as const, label: "Venta", icon: Tag, dark: "#a6d365", light: "#4d7c1f" },
+];
+
+function parsePulse(raw: string): Pulse | null {
+  try {
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start < 0 || end <= start) return null;
+    const obj = JSON.parse(cleaned.slice(start, end + 1)) as Partial<Pulse>;
+    if (!obj.clima?.reco || !obj.evento?.reco || !obj.oferta?.reco) return null;
+    const card = (c: Partial<PulseCard>): PulseCard => ({
+      reco: String(c.reco ?? ""),
+      producto: c.producto ? String(c.producto) : null,
+    });
+    return { clima: card(obj.clima), evento: card(obj.evento), oferta: card(obj.oferta) };
+  } catch {
+    return null;
+  }
+}
+
 const fadeUp = {
   initial: { opacity: 0, y: 14 },
   animate: { opacity: 1, y: 0 },
@@ -38,6 +115,9 @@ export default function Tienda() {
   const [cart, setCart] = useState<CartMap>({});
   const [filter, setFilter] = useState<ProductCategory | "todos">("todos");
   const [toast, setToast] = useState<string | null>(null);
+  const [pulse, setPulse] = useState<Pulse | null>(null);
+  const [pulseLive, setPulseLive] = useState(true);
+  const [pulseLoading, setPulseLoading] = useState(false);
 
   useEffect(() => {
     setTema(readTema());
@@ -63,6 +143,41 @@ export default function Tienda() {
     () => (filter === "todos" ? CATALOG : CATALOG.filter((p) => p.category === filter)),
     [filter]
   );
+
+  // Pulso de hoy: 1 llamada a Gemini SOLO al hacer clic (nunca al cargar)
+  async function generatePulse() {
+    if (pulseLoading) return;
+    setPulseLoading(true);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system: PULSE_SYSTEM,
+          messages: [{ role: "user", content: "Genera mi pulso de hoy." }],
+        }),
+      });
+      const data = (await res.json()) as { text?: string };
+      const parsed = parsePulse((data.text || "").trim());
+      setPulse(parsed ?? PULSE_FALLBACK);
+      setPulseLive(!!parsed);
+    } catch {
+      setPulse(PULSE_FALLBACK);
+      setPulseLive(false);
+    } finally {
+      setPulseLoading(false);
+    }
+  }
+
+  const pulseProduct = (name: string | null) =>
+    name
+      ? CATALOG.find(
+          (p) =>
+            p.name.toLowerCase() === name.toLowerCase() ||
+            p.name.toLowerCase().includes(name.toLowerCase()) ||
+            name.toLowerCase().includes(p.name.toLowerCase().split(" ")[0])
+        )
+      : undefined;
 
   const display = displayClass(tema);
   const card = `${cardClass(tema)} border-[var(--c-line)]`;
@@ -129,6 +244,83 @@ export default function Tienda() {
             </p>
           </div>
         </motion.div>
+
+        {/* PULSO DE HOY: agentes recomendando con contexto del día */}
+        <motion.section
+          {...fadeUp}
+          transition={{ ...fadeUp.transition, delay: 0.05 }}
+          className={`${card} mt-7 bg-[var(--c-surface)] p-6`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <Sparkles size={16} className="text-[var(--c-accent)]" />
+              <h2 className="text-xs font-extrabold uppercase tracking-[0.22em]">
+                Pulso de hoy
+              </h2>
+              <span
+                className={`border ${pill} px-2.5 py-0.5 text-[10px] font-bold ${
+                  pulse && !pulseLive
+                    ? "border-[var(--c-line)] text-[var(--c-muted)]"
+                    : "border-[var(--c-accent)] text-[var(--c-accent)]"
+                }`}
+              >
+                {pulse ? (pulseLive ? "IA real" : "Fallback") : "IA real"}
+              </span>
+            </div>
+            {!pulse && (
+              <button
+                onClick={generatePulse}
+                disabled={pulseLoading}
+                className={`${btn} px-5 py-2.5 text-xs`}
+              >
+                {pulseLoading ? "Leyendo tu día…" : "Generar mi pulso"}
+              </button>
+            )}
+          </div>
+          {!pulse && !pulseLoading && (
+            <p className="mt-3 text-[12.5px] leading-relaxed text-[var(--c-muted)]">
+              Los agentes cruzan el clima del día, los eventos de tu ciudad y tu
+              historial de compras para decirte qué importa hoy. Contexto demo ·
+              usa 1 llamada de IA por clic.
+            </p>
+          )}
+          {pulse && (
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              {PULSE_META.map(({ key, label, icon: Icon, dark, light }) => {
+                const c = pulse[key];
+                const color = tema === "volt" ? dark : light;
+                const prod = pulseProduct(c.producto);
+                return (
+                  <motion.article
+                    key={key}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`${card} flex flex-col bg-[var(--c-surface2)] p-4`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon size={14} style={{ color }} />
+                      <span
+                        className="text-[10px] font-extrabold uppercase tracking-[0.14em]"
+                        style={{ color }}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                    <p className="mt-2.5 flex-1 text-[13px] leading-relaxed">{c.reco}</p>
+                    {prod && (
+                      <button
+                        onClick={() => add(prod.slug)}
+                        className={`mt-3 inline-flex items-center gap-1.5 self-start ${pill} border border-[var(--c-accent)] px-3 py-1.5 text-[11px] font-extrabold text-[var(--c-accent)] transition hover:bg-[var(--c-accent)] hover:text-[var(--c-onaccent)]`}
+                      >
+                        <Plus size={11} strokeWidth={3} /> {prod.name}
+                      </button>
+                    )}
+                  </motion.article>
+                );
+              })}
+            </div>
+          )}
+        </motion.section>
 
         {/* FILTROS */}
         <motion.div
