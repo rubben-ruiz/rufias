@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────
+   Tokens Tailwind (propuestas full-web)
+   ────────────────────────────────────────────── */
+@theme {
+  /* Volt Track (dark atlético) */
+  --color-coal: #0b0b0c;
+  --color-surface: #151517;
+  --color-surface2: #202024;
+  --color-bone: #f5f5f0;
+  --color-mute: #9c9c96;
+  --color-volt: #cdff47;
+  --color-volt2: #a6e02a;
+  --color-strava: #fc4c02;
+
+  /* Lab Wellness (claro científico) */
+  --color-cream: #faf8f3;
+  --color-inkdeep: #14140f;
+  --color-pine: #1e4d36;
+  --color-pine2: #163c2a;
+  --color-sage: #dce5da;
+
+  /* Editorial Sport (revista retro) */
+  --color-paper: #f3ebdd;
+  --color-maroon: #6b1f2a;
+  --color-maroon2: #581722;
+  --color-gold: #c9a227;
+  --color-inked: #1a1714;
+
+  /* Colores por agente */
+  --color-ag-datos: #9c9c96;
+  --color-ag-captacion: #5ba0e8;
+  --color-ag-venta: #a6d365;
+  --color-ag-surtido: #efb23c;
+  --color-ag-retencion: #cdff47;
+
+  /* Fuentes (expuestas por next/font en layout.tsx) */
+  --font-archivo: var(--font-archivo);
+  --font-fraunces: var(--font-fraunces);
+  --font-instrument: var(--font-instrument-sans);
+  --font-anton: var(--font-anton);
+  --font-iserif: var(--font-instrument-serif);
+
+  /* Animaciones compartidas */
+  --animate-marquee: marquee 32s linear infinite;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* ──────────────────────────────────────────────
+   Tokens legacy (los usan / y /consola con CSS inyectado)
+   ────────────────────────────────────────────── */
+:root {
+  --bg: #0b0b0c;
+  --surface: #151517;
+  --surface2: #202024;
+  --line: rgba(255, 255, 255, 0.1);
+  --text: #f5f5f0;
+  --muted: #9c9c96;
+  --volt: #cdff47;
+  --volt2: #a6e02a;
+  --strava: #fc4c02;
+  --ag-datos: #9c9c96;
+  --ag-captacion: #5ba0e8;
+  --ag-venta: #a6d365;
+  --ag-surtido: #efb23c;
+  --ag-retencion: #cdff47;
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--volt);
+  color: #0b0b0c;
+}
