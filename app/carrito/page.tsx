@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, Check, Minus, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { ArrowRight, Check, Minus, Plus, ShieldCheck, Trash2, UserPlus } from "lucide-react";
 import { CATALOG, formatMXN } from "@/lib/catalog";
 import { cartCount, readCart, writeCart, type CartMap } from "@/lib/cart";
 import {
@@ -24,6 +24,9 @@ export default function Carrito() {
   const [processing, setProcessing] = useState(false);
   const [done, setDone] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
+  // Cuenta simulada: el "contrato" con los agentes recurrentes (demo, sin auth real)
+  const [account, setAccount] = useState<"none" | "creating" | "done">("none");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     setTema(readTema());
@@ -45,6 +48,13 @@ export default function Carrito() {
     else next[slug] = qty;
     setCart(next);
     writeCart(next);
+  }
+
+  function createAccount() {
+    if (!email.trim() || account !== "none") return;
+    setAccount("creating");
+    // Demo: en producción aquí iría Firebase Auth (Google o email)
+    setTimeout(() => setAccount("done"), 1100);
   }
 
   function checkout() {
@@ -130,6 +140,94 @@ export default function Carrito() {
                 Ver a los agentes trabajar
               </Link>
             </div>
+          </motion.div>
+        )}
+
+        {/* Cuenta = el contrato con los agentes recurrentes (simulado) */}
+        {done && account !== "done" && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className={`${card} mx-auto mt-4 max-w-xl bg-[var(--c-surface)] p-8`}
+          >
+            <div className="flex items-center gap-2.5">
+              <UserPlus size={18} className="text-[var(--c-accent)]" />
+              <h3 className="text-[15px] font-extrabold">
+                Activa el resurtido automático
+              </h3>
+            </div>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--c-muted)]">
+              Comprar no requiere cuenta. Pero para que los agentes trabajen para
+              ti todos los días, necesitan saber quién eres:
+            </p>
+            <ul className="mt-4 space-y-2.5">
+              {(
+                [
+                  ["#efb23c", "Surtido", "reserva tu próximo envío según tu fase de entrenamiento"],
+                  ["#5ba0e8", "Datos", "recalcula tu stack cada mes con tu entrenamiento real"],
+                  ["var(--c-accent)", "Retención", "si dejas de correr, pausa tu plan solo — sin cargos"],
+                ] as const
+              ).map(([color, agent, text]) => (
+                <li key={agent} className="flex items-start gap-2.5 text-[13px] leading-snug">
+                  <span
+                    className="mt-1 h-2 w-2 shrink-0 animate-pulse rounded-full"
+                    style={{ background: color }}
+                  />
+                  <span className="text-[var(--c-muted)]">
+                    <b className="text-[var(--c-text)]">{agent}</b> {text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 flex gap-2">
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && createAccount()}
+                placeholder="tu@correo.com"
+                type="email"
+                className={`${tema === "editorial" ? "rounded-none" : "rounded-xl"} w-full border border-[var(--c-line)] bg-[var(--c-surface2)] px-4 py-3 text-sm text-[var(--c-text)] outline-none transition placeholder:text-[var(--c-muted)] focus:border-[var(--c-accent)]`}
+              />
+              <button
+                onClick={createAccount}
+                disabled={!email.trim() || account === "creating"}
+                className={`${btn} shrink-0 px-5 py-3 text-sm`}
+              >
+                {account === "creating" ? "Creando…" : "Crear cuenta"}
+              </button>
+            </div>
+            <p className="mt-3 text-[11px] leading-relaxed text-[var(--c-muted)]">
+              Demo: sin registro real. En producción este paso usa Firebase Auth
+              (Google o email).
+            </p>
+          </motion.div>
+        )}
+
+        {done && account === "done" && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`${card} mx-auto mt-4 max-w-xl bg-[var(--c-surface)] p-8 text-center`}
+          >
+            <span
+              className={`mx-auto grid h-11 w-11 place-items-center ${pill} border border-[var(--c-accent)] text-[var(--c-accent)]`}
+            >
+              <Check size={20} strokeWidth={3} />
+            </span>
+            <h3 className="mt-4 text-[16px] font-extrabold">
+              Cuenta demo activa — los agentes ya trabajan para ti
+            </h3>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--c-muted)]">
+              Surtido programó tu primer resurtido según tu fase de entrenamiento
+              y Retención vigila tus señales. Puedes verlos en la consola.
+            </p>
+            <Link
+              href={`/consola?tema=${tema}`}
+              className={`${btn} mt-5 inline-flex px-6 py-3 text-sm`}
+            >
+              Abrir la consola <ArrowRight size={15} />
+            </Link>
           </motion.div>
         )}
 
